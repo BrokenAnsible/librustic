@@ -1,0 +1,33 @@
+# Node.js
+node_modules/
+dist/
+coverage/
+.npm
+*.log
+
+# Java/Maven
+target/
+*.jar
+*.war
+*.ear
+*.class
+.mvn/
+.settings/
+.project
+.classpath
+
+# Rust
+**/*.rs.bk
+Cargo.lock
+debug/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# OS specific
+.DS_Store
+Thumbs.db
