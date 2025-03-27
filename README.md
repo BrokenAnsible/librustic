@@ -99,7 +99,7 @@ public class UserService {
 
 ## When NOT to Use LibRustic
 - **Memory Pressure Sensitive Applications** Adding a wrapper class adds memory pressure
-- **Game Engine Logic**: Use object and primitives directly
+- **Game Engine Logic**: Use object and primitives directly when objects paint to screen. (services still ok)
 
 ## Performance
 
