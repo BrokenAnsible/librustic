@@ -1,6 +1,7 @@
 package io.naiant.librustic;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A type that represents either success ({@link Ok} or {@link EmptyOk}) or failure ({@link Error}).
@@ -17,7 +18,7 @@ import java.util.Optional;
  *
  * @param <T> The type of the value in case of success
  */
-public sealed interface Result<T> permits Error, Ok, EmptyOk {
+public sealed interface Result<T> permits Result.Ok, Result.EmptyOk, Result.Error {
 
     /**
      * Creates a new successful {@code Result} with the provided value.
@@ -121,4 +122,52 @@ public sealed interface Result<T> permits Error, Ok, EmptyOk {
     default Optional<? extends Exception> getException() {
         return isError() ? Optional.ofNullable(((Error<? extends Exception, T>) this).exception()) : Optional.empty();
     }
+
+    /**
+     * Transforms the value contained in this {@code Result} using the provided mapping function.
+     * <p>
+     * If this is an {@link Ok} instance, applies the mapper to the contained value and wraps the result
+     * in a new {@link Ok}. If this is an {@link EmptyOk}, returns a new {@link EmptyOk}. If this is
+     * an {@link Error}, returns a new {@link Error} with the same exception.
+     *
+     * @param <U> The type of the transformed value
+     * @param mapper The function to apply to the contained value
+     * @return A new {@code Result} containing the transformed value if this was successful,
+     *         or the original error if this was an error
+     */
+    default <U> Result<U> map(Function<T, U> mapper) {
+        return switch (this) {
+            case Error<?,?> ignored -> Result.error(((Error<? extends Exception, T>) this).exception());
+            case Ok<?> ignored -> Result.ok(mapper.apply(((Ok<T>) this).value()));
+            case EmptyOk<?> ignored -> Result.ok();
+        };
+    }
+
+    /**
+     * Transforms the value contained in this {@code Result} using the provided mapping function
+     * that itself returns a {@code Result}.
+     * <p>
+     * If this is an {@link Ok} instance, applies the mapper to the contained value and returns
+     * the resulting {@code Result} directly. If this is an {@link EmptyOk}, returns a new
+     * {@link EmptyOk}. If this is an {@link Error}, returns a new {@link Error} with the
+     * same exception.
+     * <p>
+     * This method is useful for chaining operations that might fail.
+     *
+     * @param <U> The type of the transformed value
+     * @param mapper The function to apply to the contained value, returning a new {@code Result}
+     * @return The {@code Result} returned by the mapper if this was successful,
+     *         or the original error if this was an error
+     */
+    default <U> Result<U> flatMap(Function<T, Result<U>> mapper) {
+        return switch (this) {
+            case Error<?,?> ignored -> Result.error(((Error<? extends Exception, T>) this).exception());
+            case Ok<?> ignored -> mapper.apply(((Ok<T>) this).value());
+            case EmptyOk<?> ignored -> Result.ok();
+        };
+    }
+
+    record Ok<T>(T value) implements Result<T>{}
+    record Error<E extends Exception, T>(E exception) implements Result<T> {}
+    record EmptyOk<Void>() implements Result<Void> {}
 }
