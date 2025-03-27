@@ -97,6 +97,10 @@ public class UserService {
 }
 ```
 
+## When NOT to Use LibRustic
+- **Memory Pressure Sensitive Applications** Adding a wrapper class adds memory pressure
+- **Game Engine Logic**: Use object and primitives directly
+
 ## Performance
 
 Using Result types instead of exceptions can lead to better performance in error cases, as exceptions are not designed for control flow. The Result type allows for:
